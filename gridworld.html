@@ -98,27 +98,25 @@
   </head>
   <body>
     <div id="content">
-      <div id="editor">from browser import window
-
-def start():
-&#9;print("start")
+      <div id="editor">import gridworld
 
 tickCount = 0
 def tick():
-&#9;global tickCount
-&#9;tickCount += 1  
-&#9;if tickCount % 3 == 0:
-&#9;&#9;# Show the current rotation, before we rotate.
-&#9;&#9;print("Rotation: ", getRotation())
-&#9;&#9;
-&#9;&#9;# Turn the bug clockwise.
-&#9;&#9;turnRight()
-&#9;else:
-&#9;&#9;# Show the current position, before we move.
-&#9;&#9;print("Position: ", getPosition())
-&#9;&#9;
-&#9;&#9;# Move the bug forward.
-&#9;&#9;moveForward()
+    global tickCount
+    tickCount += 1  
+    if tickCount % 3 == 0:        
+        # Turn the bug clockwise.
+        gridworld.getBug().turnRight()
+
+        # Show the new rotation.
+        print("Direction: ", gridworld.getBug().direction)
+    else:
+        # Move the bug forward.
+        gridworld.getBug().moveForward()
+
+        # Show the new position.
+        print("Position: ", gridworld.getBug().x, ", ", gridworld.getBug().y)
+gridworld.onTick(tick)
 </div>
       <div id="result">
         <div id="boardContainer">
@@ -156,34 +154,30 @@ def tick():
         logDiv.scrollTop = logDiv.scrollHeight - logDiv.clientHeight;
       }
 
+      var gameRoot = document.querySelector("#board");
+      var images = {
+        "bug": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADoAAAA6CAYAAADhu0ooAAABhWlDQ1BJQ0MgcHJvZmlsZQAAKJF9kT1Iw0AYht+mSotUHNpBxCFD1cWCqIijVLEIFkpboVUHk0v/oElDkuLiKLgWHPxZrDq4OOvq4CoIgj8gbm5Oii5S4ndJoUWMdxz38N73vtx9BwjNKlPNnglA1SwjnYiLufyqGHhFkKYfYYxJzNSTmcUsPMfXPXx8v4vxLO+6P0e/UjAZ4BOJ55huWMQbxDObls55nzjCypJCfE48btAFiR+5Lrv8xrnksMAzI0Y2PU8cIRZLXSx3MSsbKvE0cVRRNcoXci4rnLc4q9U6a9+TvzBU0FYyXKc1jASWkEQKImTUUUEVFmK0a6SYSNN53MM/5PhT5JLJVQEjxwJqUCE5fvA/+N1bszg16SaF4kDvi21/jACBXaDVsO3vY9tunQD+Z+BK6/hrTWD2k/RGR4seAQPbwMV1R5P3gMsdYPBJlwzJkfy0hGIReD+jb8oD4Vugb83tW/scpw9Alnq1fAMcHAKjJcpe93h3sLtv/9a0+/cDTPJymHuCs7EAAAAGYktHRAD/AP8A/6C9p5MAAAAJcEhZcwAALiMAAC4jAXilP3YAAAAHdElNRQflCAgDFwPhVSjKAAAAGXRFWHRDb21tZW50AENyZWF0ZWQgd2l0aCBHSU1QV4EOFwAAAU1JREFUaN7t2rsBwjAMBFCfd2AW9mAaRmAa9mAWhjAlFcbm9CVSmQLrRXJQPmh2MT4ch8XicEaa5YEASJNcEASpng8CIVVzgjVw3B/vxS9ns9zghbTGwhNpiYU30goLTeQKcAMMT6goUhOLaEgtLCIiNbCIipTGQgKpAVwEQxpqWkWN6iILksUiE5LBdoW7D88Yu9CMyGnuYJDB9ujUhj+q5BTb20HiMFBqj2ayUZPRrZ1MM7+258+Dz8+ta41k16yLUbI9O1Qq6tG27NrVugUtaEELWtAo0MnM6Tnv0lAkKBiqdVmoR/sya3ap1ojctnTrWlaVXauzZ87zCrzTaSkuRhInU+z9qNY9KvOciK2oWQtL/qb4q32J6i4AYQVVw2ogJf4flx6cfUNvtKjL5zdbWMdtJj7xjIhArdFuRERqzrAjWl6H+aa+oiJpvADza2mjQtH41QAAAABJRU5ErkJggg==",
+      }
       function onFrameMessage(msg) {
         if (msg.data.indexOf("gridworld__internal__command") === 0) {
           const command_and_data = msg.data.substr("gridworld__internal__command:".length);
           const command = command_and_data.substr(0, command_and_data.indexOf(":"));
           const data = command_and_data.substr(command.length + 1);
-
           if (command === "print") {
             addLogLine(data);
           }
-          if (command === "bug_move") {
-            const dir = [
-              [0, -1],
-              [1, -1],
-              [1, 0],
-              [1, 1],
-              [0, 1],
-              [-1, 1],
-              [-1, 0],
-              [-1, -1],
-            ][bug.direction];
-            var mult = data === "forward" ? 1 : -1;
-            bug.moveTo(bug.x + dir[0] * mult, bug.y + dir[1] * mult);
-            bug.updatePython();
-          }
-          if (command === "bug_rotate") {
-            var amt = data === "right" ? 1 : -1;
-            bug.rotateTo(bug.direction + amt);
-            bug.updatePython();
+          if (command === "update_actor") {
+            var actorData = JSON.parse(data);
+            actorsById[actorData.id] = actorData;
+            if (!elesById[actorData.id]) {
+              elesById[actorData.id] = document.createElement("div");
+              elesById[actorData.id].classList.add("actor");
+              elesById[actorData.id].style["backgroundImage"] = "url(" + images[actorData.img] + ")";
+              gameRoot.appendChild(elesById[actorData.id]);
+            }
+            elesById[actorData.id].style.left = Math.floor(actorData.x / size * 100) + "%";
+            elesById[actorData.id].style.top = Math.floor(actorData.y / size * 100) + "%";
+            elesById[actorData.id].style.transform = "rotate(" + Math.floor(actorData.direction * 45) + "deg)";
           }
         }
       }
@@ -191,56 +185,10 @@ def tick():
       var iframe = null;
       var frameHost = document.querySelector("#frameHost");
       var size = 9;
-
-      var id = 0;
-      class Actor {
-        id = id++;
-        x = 0;
-        y = 0;
-        direction = 0;
-        img = "/bug.png";
-        ele = null;
-        constructor(img) {
-          this.img = img;
-          this.ele = document.createElement("div");
-          this.ele.style["background-image"] = "url(" + this.img + ")";
-          this.ele.classList.add("actor");
-          this.moveTo(0, 0);
-          this.rotateTo(0);
-        }
-        rotateTo = function(direction) {
-          if (direction < 0) {
-            direction += 8;
-          }
-          direction %= 8;
-          this.ele.style["transform"] = "rotate(" + (direction*45) + "deg)";
-          this.direction = direction;
-        }
-        moveTo = function(x, y) {
-          if (x < 0 || y < 0 || x >= size || y >= size) {
-            addLogLine("Invalid move position (x = " + x + ", y = " + y + ")");
-            return;
-          }
-          this.ele.style.left = Math.floor((x / size) * 100) + "%";
-          this.ele.style.top = Math.floor((y / size) * 100) + "%";
-          this.x = x;
-          this.y = y;
-        }
-        updatePython = function() {
-          if (iframe && iframe.contentWindow) {
-            iframe.contentWindow.postMessage("gridworld__internal__data:actor_" + this.id + "_d:" + this.direction);
-            iframe.contentWindow.postMessage("gridworld__internal__data:actor_" + this.id + "_x:" + this.x);
-            iframe.contentWindow.postMessage("gridworld__internal__data:actor_" + this.id + "_y:" + this.y);
-          }
-        }
-      }
-
-      var actorList = [];
-      const bugUri = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADoAAAA6CAYAAADhu0ooAAABhWlDQ1BJQ0MgcHJvZmlsZQAAKJF9kT1Iw0AYht+mSotUHNpBxCFD1cWCqIijVLEIFkpboVUHk0v/oElDkuLiKLgWHPxZrDq4OOvq4CoIgj8gbm5Oii5S4ndJoUWMdxz38N73vtx9BwjNKlPNnglA1SwjnYiLufyqGHhFkKYfYYxJzNSTmcUsPMfXPXx8v4vxLO+6P0e/UjAZ4BOJ55huWMQbxDObls55nzjCypJCfE48btAFiR+5Lrv8xrnksMAzI0Y2PU8cIRZLXSx3MSsbKvE0cVRRNcoXci4rnLc4q9U6a9+TvzBU0FYyXKc1jASWkEQKImTUUUEVFmK0a6SYSNN53MM/5PhT5JLJVQEjxwJqUCE5fvA/+N1bszg16SaF4kDvi21/jACBXaDVsO3vY9tunQD+Z+BK6/hrTWD2k/RGR4seAQPbwMV1R5P3gMsdYPBJlwzJkfy0hGIReD+jb8oD4Vugb83tW/scpw9Alnq1fAMcHAKjJcpe93h3sLtv/9a0+/cDTPJymHuCs7EAAAAGYktHRAD/AP8A/6C9p5MAAAAJcEhZcwAALiMAAC4jAXilP3YAAAAHdElNRQflCAgDFwPhVSjKAAAAGXRFWHRDb21tZW50AENyZWF0ZWQgd2l0aCBHSU1QV4EOFwAAAU1JREFUaN7t2rsBwjAMBFCfd2AW9mAaRmAa9mAWhjAlFcbm9CVSmQLrRXJQPmh2MT4ch8XicEaa5YEASJNcEASpng8CIVVzgjVw3B/vxS9ns9zghbTGwhNpiYU30goLTeQKcAMMT6goUhOLaEgtLCIiNbCIipTGQgKpAVwEQxpqWkWN6iILksUiE5LBdoW7D88Yu9CMyGnuYJDB9ujUhj+q5BTb20HiMFBqj2ayUZPRrZ1MM7+258+Dz8+ta41k16yLUbI9O1Qq6tG27NrVugUtaEELWtAo0MnM6Tnv0lAkKBiqdVmoR/sya3ap1ojctnTrWlaVXauzZ87zCrzTaSkuRhInU+z9qNY9KvOciK2oWQtL/qb4q32J6i4AYQVVw2ogJf4flx6cfUNvtKjL5zdbWMdtJj7xjIhArdFuRERqzrAjWl6H+aa+oiJpvADza2mjQtH41QAAAABJRU5ErkJggg==";
-      var bug = new Actor(bugUri);
-      actorList.push(bug);
       
-      var gameRoot = document.querySelector("#board");
+      var actorsById = {};
+      var elesById = {};
+      
       function initGame() {
         for (var c of gameRoot.children){
           c.remove();
@@ -256,9 +204,8 @@ def tick():
           ele.style.top = Math.floor(((x + 1) / size) * 100) + "%";
           gameRoot.appendChild(ele);
         }
-        gameRoot.appendChild(bug.ele);
-        bug.moveTo(1, 5);
-        bug.updatePython();
+        actorsById = {};
+        elesById = {};
       }
 
       function formatDate(d) {
@@ -287,7 +234,6 @@ def tick():
           initGame();
           iframe.contentWindow.postMessage("gridworld__internal__script:" + editor.getValue());
           iframe.contentWindow.addEventListener("message", onFrameMessage);
-          bug.updatePython();
           tickInterval = setInterval(function() {
             iframe.contentWindow.postMessage("gridworld__internal__tick");
           }, 500);
