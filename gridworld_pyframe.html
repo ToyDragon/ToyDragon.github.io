@@ -22,9 +22,28 @@
           var code = e.data.substr("gridworld__internal__script:".length);
           document.querySelector("#pyScript").innerHTML = 
             "from browser import window\n" +
+            "gridworld__internal__data = {}\n" + 
             "def gridworld__internal__onMessage(e):\n" +
-            "  if e.data == \"gridworld__internal__tick\":\n" +
+            "  if e.data.startswith(\"gridworld__internal__tick\"):\n" +
             "    tick()\n" +
+            "  if e.data.startswith(\"gridworld__internal__data\"):\n" +
+            "    name = e.data.split(\":\")[1]\n" +
+            "    val = e.data.split(\":\")[2]\n" +
+            "    gridworld__internal__data[name] = val\n" +
+            "def getPosition():\n" +
+            "  global gridworld__internal__data\n" +
+            "  return (int(gridworld__internal__data[\"actor_0_x\"]), int(gridworld__internal__data[\"actor_0_y\"]))\n" +
+            "def getRotation():\n" +
+            "  global gridworld__internal__data\n" +
+            "  return int(gridworld__internal__data[\"actor_0_d\"])\n" +
+            "def moveForward():\n" +
+            "  window.postMessage(\"gridworld__internal__command:bug_move:forward\")\n" +
+            "def moveBackwards():\n" +
+            "  window.postMessage(\"gridworld__internal__command:bug_move:backwards\")\n" +
+            "def turnRight():\n" +
+            "  window.postMessage(\"gridworld__internal__command:bug_rotate:right\")\n" +
+            "def turnLeft():\n" +
+            "  window.postMessage(\"gridworld__internal__command:bug_rotate:left\")\n" +
             "window.addEventListener(\"message\", gridworld__internal__onMessage)\n" +
             "def tick(): return\n" + 
             "def start(): return\n" +
