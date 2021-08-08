@@ -128,7 +128,7 @@
         top: 12px;
       }
 
-      .scenarioInfo {
+      #scenarioInfo {
         position: relative;
         display: inline-block;
         height: 192px;
@@ -148,84 +148,23 @@
             <span>Python</span>
             <span>Gridworld</span>
           </span>
-          <div class="btn-group btnContainer">
+          <div id="btnScenario" class="btn-group btnContainer">
             <button type="button" class="btn btn-info dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
               Switch Scenario
             </button>
             <ul class="dropdown-menu">
-              <li><a class="dropdown-item" href="#">Circle Bugs</a></li>
+              <li><a class="dropdown-item" href="#" data-scenarioname="introduction">Introduction</a></li>
+              <li><a class="dropdown-item" href="#" data-scenarioname="circle_bugs">Circle Bugs</a></li>
             </ul>
           </div>
         </div>
-        <div class="scenarioInfo">
+        <div id="scenarioInfo">
           <div>
-            <h3>Scenario: Circle Bugs</h3>
-            <p>This scenario demonstrates two bugs with identical behavior, but very different implementations.</p>
-            <p>
-              The first bug, the red one called "bug A", was implemented by a dumbass.
-              It's hardcoded to do the same exact 24 movements, repeatedly, until it dies a slow and cold bug death.
-              Imagine if you wanted to extend the radius of it's circle path by 1, you'd have to change all the indices, you'd have to add or remove a bunch of moveForward commands.
-              It'd be crazy.
-            </p>
-            <p>
-              The other bug, the blue one called "bug B", is god-tier.
-              It's implemented to be flexible. Altering the circle path is easy. You could even change it to go in a square pattern pretty easily.
-            </p>
+            <h3>Welcome to Gridworld</h3>
+            <p>Choose a scenario to get started.</p>
           </div>
         </div>
-        <div id="editor">import gridworld
-
-bugA = gridworld.createBug(7, 3)
-bugA.setColor("red")
-bugA.turnRight()
-bugA.turnRight()
-bugA.turnRight()
-bugA.turnRight()
-
-bugATickCount = 0
-def tickBugA():
-    global bugATickCount
-    state = (bugATickCount % 24)
-    if state == 0: bugA.moveForward()
-    if state == 1: bugA.moveForward()
-    if state == 2: bugA.turnRight()
-    if state == 3: bugA.moveForward()
-    if state == 4: bugA.moveForward()
-    if state == 5: bugA.turnRight()
-    if state == 6: bugA.moveForward()
-    if state == 7: bugA.moveForward()
-    if state == 8: bugA.turnRight()
-    if state == 9: bugA.moveForward()
-    if state == 10: bugA.moveForward()
-    if state == 11: bugA.turnRight()
-    if state == 12: bugA.moveForward()
-    if state == 13: bugA.moveForward()
-    if state == 14: bugA.turnRight()
-    if state == 15: bugA.moveForward()
-    if state == 16: bugA.moveForward()
-    if state == 17: bugA.turnRight()
-    if state == 18: bugA.moveForward()
-    if state == 19: bugA.moveForward()
-    if state == 20: bugA.turnRight()
-    if state == 21: bugA.moveForward()
-    if state == 22: bugA.moveForward()
-    if state == 23: bugA.turnRight()
-    bugATickCount += 1
-gridworld.onTick(tickBugA)
-
-bugBTickCount = 0
-bugB = gridworld.createBug(1, 5)
-bugB.setColor("blue")
-def tickBugB():
-    global bugBTickCount
-    # Every third tick, turn the bug clockwise.
-    if bugBTickCount % 3 == 2:
-        bugB.turnRight()
-    # For the other two ticks, move the bug forward.
-    else:
-        bugB.moveForward()
-    bugBTickCount += 1  
-gridworld.onTick(tickBugB)</div>
+        <div id="editor"></div>
       </div>
       <div id="result">
         <div id="boardContainer">
@@ -243,6 +182,16 @@ gridworld.onTick(tickBugB)</div>
       var editor = ace.edit("editor");
       editor.setTheme("ace/theme/monokai");
       editor.session.setMode("ace/mode/python");
+
+      document.querySelectorAll("#btnScenario > ul > li").forEach(function (element) {
+        element.addEventListener("click", async function(e) {
+          var scenarioName = e.target.getAttribute("data-scenarioname");
+          console.log(scenarioName);
+          document.querySelector("#scenarioInfo").innerHTML = await (await fetch("/data/" + scenarioName + ".html")).text();
+          editor.setValue(await (await fetch("/data/" + scenarioName + ".py")).text(), -1);
+          runCode();
+        });
+      });
 
       var logDiv = document.querySelector("#log");
       function addLogLine(message) {
@@ -283,6 +232,7 @@ gridworld.onTick(tickBugB)</div>
               elesById[actorData.id] = document.createElement("div");
               elesById[actorData.id].classList.add("actor");
               elesById[actorData.id].innerHTML = images[actorData.img];
+              elesById[actorData.id].setAttribute("data-id", actorData.id);
               gameRoot.appendChild(elesById[actorData.id]);
             }
             elesById[actorData.id].style.left = Math.floor(actorData.x / size * 100) + "%";
@@ -301,8 +251,8 @@ gridworld.onTick(tickBugB)</div>
       var elesById = {};
       
       function initGame() {
-        for (var c of gameRoot.children){
-          c.remove();
+        while (gameRoot.children.length > 0) {
+          gameRoot.children[0].remove();
         }
         for (let x = 0; x < size - 1; ++x) {
           var ele = document.createElement("div");
@@ -350,7 +300,6 @@ gridworld.onTick(tickBugB)</div>
           }, 500);
         }, 100);
       }
-      runCode();
 
       window.addEventListener("keydown", function(event) {
         if (event.ctrlKey || event.metaKey) {
