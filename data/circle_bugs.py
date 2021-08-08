@@ -1,7 +1,12 @@
 import gridworld
 
+#################################################
+# Stupid Red Bug
+#################################################
 bugA = gridworld.createBug(7, 3)
 bugA.setColor("red")
+
+# Bugs spawn facing north, turn this one to start facing south.
 bugA.turnRight()
 bugA.turnRight()
 bugA.turnRight()
@@ -38,6 +43,9 @@ def tickBugA():
     bugATickCount += 1
 gridworld.onTick(tickBugA)
 
+#################################################
+# Intelligent Blue Bug
+#################################################
 bugBTickCount = 0
 bugB = gridworld.createBug(1, 5)
 bugB.setColor("blue")
