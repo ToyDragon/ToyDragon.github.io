@@ -108,8 +108,6 @@
 
       .actor {
         position: absolute;
-        width: 56px;
-        height: 56px;
         background-size: 100% 100%;
         background-blend-mode: multiply;
       }
@@ -153,8 +151,9 @@
               Switch Scenario
             </button>
             <ul class="dropdown-menu">
-              <li><a class="dropdown-item" href="#" data-scenarioname="introduction">Introduction</a></li>
-              <li><a class="dropdown-item" href="#" data-scenarioname="circle_bugs">Circle Bugs</a></li>
+              <li><a class="dropdown-item" href="#" data-scenarioname="introduction" data-gridwidth="4" data-gridheight="4">Introduction</a></li>
+              <li><a class="dropdown-item" href="#" data-scenarioname="circle_bugs" data-gridwidth="9" data-gridheight="9">Circle Bugs</a></li>
+              <li><a class="dropdown-item" href="#" data-scenarioname="fizz_buzz" data-gridwidth="20" data-gridheight="2">Fizz Buzz Bugs</a></li>
             </ul>
           </div>
         </div>
@@ -182,14 +181,35 @@
       var editor = ace.edit("editor");
       editor.setTheme("ace/theme/monokai");
       editor.session.setMode("ace/mode/python");
+      
+      var iframe = null;
+      var frameHost = document.querySelector("#frameHost");
+      
+      var grid_width = 9;
+      var grid_height = 9;
+      var actorsById = {};
+      var elesById = {};
+
+      async function loadScenario(scenario) {
+          var ele = document.querySelector("a[data-scenarioname=" + scenario + "]");
+          if (!ele) {
+            return;
+          }
+          grid_width = Number(ele.getAttribute("data-gridwidth"));
+          grid_height = Number(ele.getAttribute("data-gridheight"));
+          document.querySelector("#scenarioInfo").innerHTML = await (await fetch("/data/" + scenario + ".html")).text();
+          editor.setValue(await (await fetch("/data/" + scenario + ".py")).text(), -1);
+          window.location.hash = "#" + scenario;
+          runCode();
+      }
+
+      if (window.location.hash) {
+        loadScenario(window.location.hash.split("#")[1]);
+      }
 
       document.querySelectorAll("#btnScenario > ul > li").forEach(function (element) {
-        element.addEventListener("click", async function(e) {
-          var scenarioName = e.target.getAttribute("data-scenarioname");
-          console.log(scenarioName);
-          document.querySelector("#scenarioInfo").innerHTML = await (await fetch("/data/" + scenarioName + ".html")).text();
-          editor.setValue(await (await fetch("/data/" + scenarioName + ".py")).text(), -1);
-          runCode();
+        element.addEventListener("click", function(e) {
+          loadScenario(e.target.getAttribute("data-scenarioname"));
         });
       });
 
@@ -215,7 +235,8 @@
       var gameRoot = document.querySelector("#board");
       var images = {
         //"bug": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADoAAAA6CAYAAADhu0ooAAABhWlDQ1BJQ0MgcHJvZmlsZQAAKJF9kT1Iw0AYht+mSotUHNpBxCFD1cWCqIijVLEIFkpboVUHk0v/oElDkuLiKLgWHPxZrDq4OOvq4CoIgj8gbm5Oii5S4ndJoUWMdxz38N73vtx9BwjNKlPNnglA1SwjnYiLufyqGHhFkKYfYYxJzNSTmcUsPMfXPXx8v4vxLO+6P0e/UjAZ4BOJ55huWMQbxDObls55nzjCypJCfE48btAFiR+5Lrv8xrnksMAzI0Y2PU8cIRZLXSx3MSsbKvE0cVRRNcoXci4rnLc4q9U6a9+TvzBU0FYyXKc1jASWkEQKImTUUUEVFmK0a6SYSNN53MM/5PhT5JLJVQEjxwJqUCE5fvA/+N1bszg16SaF4kDvi21/jACBXaDVsO3vY9tunQD+Z+BK6/hrTWD2k/RGR4seAQPbwMV1R5P3gMsdYPBJlwzJkfy0hGIReD+jb8oD4Vugb83tW/scpw9Alnq1fAMcHAKjJcpe93h3sLtv/9a0+/cDTPJymHuCs7EAAAAGYktHRAD/AP8A/6C9p5MAAAAJcEhZcwAALiMAAC4jAXilP3YAAAAHdElNRQflCAgDFwPhVSjKAAAAGXRFWHRDb21tZW50AENyZWF0ZWQgd2l0aCBHSU1QV4EOFwAAAU1JREFUaN7t2rsBwjAMBFCfd2AW9mAaRmAa9mAWhjAlFcbm9CVSmQLrRXJQPmh2MT4ch8XicEaa5YEASJNcEASpng8CIVVzgjVw3B/vxS9ns9zghbTGwhNpiYU30goLTeQKcAMMT6goUhOLaEgtLCIiNbCIipTGQgKpAVwEQxpqWkWN6iILksUiE5LBdoW7D88Yu9CMyGnuYJDB9ujUhj+q5BTb20HiMFBqj2ayUZPRrZ1MM7+258+Dz8+ta41k16yLUbI9O1Qq6tG27NrVugUtaEELWtAo0MnM6Tnv0lAkKBiqdVmoR/sya3ap1ojctnTrWlaVXauzZ87zCrzTaSkuRhInU+z9qNY9KvOciK2oWQtL/qb4q32J6i4AYQVVw2ogJf4flx6cfUNvtKjL5zdbWMdtJj7xjIhArdFuRERqzrAjWl6H+aa+oiJpvADza2mjQtH41QAAAABJRU5ErkJggg==",
-        "bug": '<svg viewBox="0 0 500 500" xmlns="http://www.w3.org/2000/svg" xmlns:bx="https://boxy-svg.com"><path d="M 632 783 m -187.707 0 a 187.707 185.942 0 1 0 375.414 0 a 187.707 185.942 0 1 0 -375.414 0 Z M 632 783 m -112.624 0 a 112.624 111.566 0 0 1 225.248 0 a 112.624 111.566 0 0 1 -225.248 0 Z" style="fill: rgb(45, 45, 45);" transform="matrix(-0.553149, 0.833082, -0.833082, -0.553149, 1239.99939, 195.733459)" bx:shape="ring 632 783 112.624 111.566 187.707 185.942 1@d533d269"/><path d="M 226.651 11.43 L 393.798 331.124 L 59.503 331.124 L 226.651 11.43 Z" style="fill: rgb(45, 45, 45);" transform="matrix(-0.49834, -0.866982, 0.866982, -0.49834, 154.434402, 507.18338)" bx:shape="triangle 59.503 11.43 334.295 319.694 0.5 0 1@ed5f7eed"/><path d="M 240.361 33.987 L 388.53 318.919 L 92.191 318.919 L 240.361 33.987 Z" style="fill: rgb(160, 160, 160);" transform="matrix(-0.507729, -0.861517, 0.861517, -0.507729, 167.479477, 513.572876)" bx:shape="triangle 92.191 33.987 296.339 284.932 0.5 0 1@a66c1550"/><circle cx="237.49" cy="289.992" r="169.13"/></svg>'
+        "bug": '<svg viewBox="0 0 500 500" xmlns="http://www.w3.org/2000/svg" xmlns:bx="https://boxy-svg.com"><path d="M 632 783 m -187.707 0 a 187.707 185.942 0 1 0 375.414 0 a 187.707 185.942 0 1 0 -375.414 0 Z M 632 783 m -112.624 0 a 112.624 111.566 0 0 1 225.248 0 a 112.624 111.566 0 0 1 -225.248 0 Z" style="fill: rgb(45, 45, 45);" transform="matrix(-0.553149, 0.833082, -0.833082, -0.553149, 1239.99939, 195.733459)" bx:shape="ring 632 783 112.624 111.566 187.707 185.942 1@d533d269"/><path d="M 226.651 11.43 L 393.798 331.124 L 59.503 331.124 L 226.651 11.43 Z" style="fill: rgb(45, 45, 45);" transform="matrix(-0.49834, -0.866982, 0.866982, -0.49834, 154.434402, 507.18338)" bx:shape="triangle 59.503 11.43 334.295 319.694 0.5 0 1@ed5f7eed"/><path d="M 240.361 33.987 L 388.53 318.919 L 92.191 318.919 L 240.361 33.987 Z" style="fill: rgb(160, 160, 160);" transform="matrix(-0.507729, -0.861517, 0.861517, -0.507729, 167.479477, 513.572876)" bx:shape="triangle 92.191 33.987 296.339 284.932 0.5 0 1@a66c1550"/><circle cx="237.49" cy="289.992" r="169.13"/></svg>',
+        "flower": '<svg viewBox="0 0 58 58" xmlns="http://www.w3.org/2000/svg"><g><title>Layer 1</title><path transform="rotate(35.6875 38.1286 33.1956)" stroke="#000" id="svg_11" d="m23.64179,41.82543l0,-17.25975l28.97365,17.25975l-28.97365,0z" fill="#1b661f"/><path transform="rotate(6.7242 42.4602 26.5645)" stroke="#000" id="svg_10" d="m26.96382,33.48266l0,-13.83625l30.99268,13.83625l-30.99268,0z" fill="#1b661f"/><path transform="rotate(-41.002 34.9735 15.8694)" stroke="#000" id="svg_9" d="m20.21418,23.56989l0,-15.40107l29.51872,15.40107l-29.51872,0z" fill="#1b661f"/><path transform="rotate(-5.24973 20.8024 30.2009)" stroke="#000" id="svg_12" d="m37.77505,36.20868l0,-12.01556l-33.94527,12.01556l33.94527,0z" fill="#1b661f"/><path transform="rotate(24.5193 21.6045 16.9923)" stroke="#000" id="svg_14" d="m38.58116,24.86028l0,-15.73588l-33.95321,15.73588l33.95321,0z" fill="#1b661f"/><ellipse transform="rotate(3.25646 31.7808 24.6685)" stroke="#000" ry="12.08418" rx="12.55655" id="svg_15" cy="24.66845" cx="31.78075"/></g></svg>',
       };
       function onFrameMessage(msg) {
         if (msg.data.indexOf("gridworld__internal__command") === 0) {
@@ -235,34 +256,38 @@
               elesById[actorData.id].setAttribute("data-id", actorData.id);
               gameRoot.appendChild(elesById[actorData.id]);
             }
-            elesById[actorData.id].style.left = Math.floor(actorData.x / size * 100) + "%";
-            elesById[actorData.id].style.top = Math.floor(actorData.y / size * 100) + "%";
-            elesById[actorData.id].style.transform = "rotate(" + Math.floor(actorData.direction * 45) + "deg)";
+            var max_dim = Math.max(grid_width, grid_height);
+            var size = (1 / max_dim * 100);
+            elesById[actorData.id].style.left = (((actorData.x + 0.5) / grid_width) * 100) - (size/2) + "%";
+            elesById[actorData.id].style.top = (((actorData.y + 0.5) / grid_height) * 100) - (size/2) + "%";
+            elesById[actorData.id].style.width = size + "%";
+            elesById[actorData.id].style.height = size + "%";
+            elesById[actorData.id].children[0].style.transform = "rotate(" + Math.floor(actorData.direction * 45) + "deg)";
             elesById[actorData.id].children[0].style.fill = actorData.color;
           }
         }
+        if (msg.data === "gridworld__internal__ready") {
+          iframe.contentWindow.postMessage("gridworld__internal__setsize:" + grid_width + ":" + grid_height);
+          tickInterval = setInterval(function() {
+            iframe.contentWindow.postMessage("gridworld__internal__tick");
+          }, 500);
+        }
       }
-      
-      var iframe = null;
-      var frameHost = document.querySelector("#frameHost");
-      var size = 9;
-      
-      var actorsById = {};
-      var elesById = {};
       
       function initGame() {
         while (gameRoot.children.length > 0) {
           gameRoot.children[0].remove();
         }
-        for (let x = 0; x < size - 1; ++x) {
+        for (let x = 0; x < grid_width - 1; ++x) {
           var ele = document.createElement("div");
           ele.classList.add("verticalBar");
-          ele.style.left = Math.floor(((x + 1) / size) * 100) + "%";
+          ele.style.left = Math.floor(((x + 1) / grid_width) * 100) + "%";
           gameRoot.appendChild(ele);
-
+        }
+        for (let y = 0; y < grid_height - 1; ++y) {
           ele = document.createElement("div");
           ele.classList.add("horizontalBar");
-          ele.style.top = Math.floor(((x + 1) / size) * 100) + "%";
+          ele.style.top = Math.floor(((y + 1) / grid_height) * 100) + "%";
           gameRoot.appendChild(ele);
         }
         actorsById = {};
@@ -281,6 +306,7 @@
       function runCode() {
         if (tickInterval) {
           clearInterval(tickInterval);
+          tickInterval = null;
         }
         if (iframe !== null) {
           iframe.contentWindow.removeEventListener("message", onFrameMessage);
@@ -291,13 +317,9 @@
         iframe.src = "/gridworld_pyframe.html";
         frameHost.appendChild(iframe);
         setTimeout(function() {
-          addLogLine("-- code updated");
           initGame();
-          iframe.contentWindow.postMessage("gridworld__internal__script:" + editor.getValue());
           iframe.contentWindow.addEventListener("message", onFrameMessage);
-          tickInterval = setInterval(function() {
-            iframe.contentWindow.postMessage("gridworld__internal__tick");
-          }, 500);
+          iframe.contentWindow.postMessage("gridworld__internal__script:" + editor.getValue());
         }, 100);
       }
 

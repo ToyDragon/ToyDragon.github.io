@@ -2,7 +2,7 @@ import gridworld
 
 # Create a bug at the coordinates (3, 5).
 # Coordinates are from the top left of the grid.
-bug = gridworld.createBug(3, 5)
+bug = gridworld.createBug(0, 2)
 
 # Give the bug a recognizable color.
 bug.setColor("red")

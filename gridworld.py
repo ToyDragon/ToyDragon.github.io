@@ -1,6 +1,8 @@
 from browser import window
+from browser import timer
 
-size = 9
+grid_width = 9
+grid_height = 9
 next_id = 0
 class Actor:
   id = 0
@@ -24,7 +26,8 @@ class Actor:
     self.direction = direction
     self.updateHost()
   def moveTo(self, x, y):
-    if x < 0 or y < 0 or x >= size or y >= size:
+    global grid_width, grid_height
+    if x < 0 or y < 0 or x >= grid_width or y >= grid_height:
       print("Invalid move position (x = ", x, ", y = ", y, ")")
       return
     self.x = x
@@ -33,7 +36,7 @@ class Actor:
   def setColor(self, color):
     self.color = color
     self.updateHost()
-  def moveLinear(self, forward):
+  def getLinearOffest(self, forward):
     dir = [
       [0, -1],
       [1, -1],
@@ -46,7 +49,10 @@ class Actor:
     ][self.direction]
     mult = 1
     if not forward: mult = -1
-    self.moveTo(self.x + dir[0] * mult, self.y + dir[1] * mult)
+    return (self.x + dir[0] * mult, self.y + dir[1] * mult)
+  def moveLinear(self, forward):
+    new_pos = self.getLinearOffest(forward)
+    self.moveTo(new_pos[0], new_pos[1])
   def moveForward(self):
     self.moveLinear(True)
   def moveBackward(self):
@@ -59,7 +65,16 @@ class Actor:
     self.rotate(False)
   def turnRight(self):
     self.rotate(True)
-
+  def canMoveForward(self):
+    global grid_width, grid_height
+    new_pos = self.getLinearOffest(True)
+    if new_pos[0] < 0 or new_pos[1] < 0 or new_pos[0] >= grid_width or new_pos[1] >= grid_height:
+      return False
+    return True
+  def poop(self):
+    flowerInstance = Actor("flower")
+    flowerInstance.moveTo(self.x, self.y)
+    flowerInstance.setColor(self.color)
 
 def createBug(x, y):
   bugInstance = Actor("bug")
@@ -68,11 +83,22 @@ def createBug(x, y):
 
 tickFns = []
 def gridworld__internal__onMessage(e):
-  global tickFns
+  global tickFns, grid_width, grid_height
   if e.data.startswith("gridworld__internal__tick"):
     for fn in tickFns:
       fn()
-window.addEventListener("message", gridworld__internal__onMessage)
+  if e.data.startswith("gridworld__internal__setsize"):
+    grid_width = int(e.data.split(":")[1])
+    grid_height = int(e.data.split(":")[2])
+
+initialized = False
+def init():
+  global initialized
+  if not initialized:
+    initialized = True
+    # Let the container know we are initialized.
+    window.postMessage("gridworld__internal__ready")
+    window.addEventListener("message", gridworld__internal__onMessage)
 
 def onTick(fn):
   global tickFns
