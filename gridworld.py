@@ -8,6 +8,7 @@ class Actor:
   y = 0
   direction = 0
   img = ""
+  color = ""
   def __init__(self, img):
     global next_id
     self.id = next_id
@@ -16,7 +17,7 @@ class Actor:
     self.moveTo(0, 0)
     self.rotateTo(0)
   def updateHost(self):
-    window.postMessage("gridworld__internal__command:update_actor:{\"id\": " + str(self.id) + ", \"img\": \"" + self.img + "\", \"x\": " + str(self.x) + ", \"y\": " + str(self.y) + ", \"direction\": " + str(self.direction) + "}")
+    window.postMessage("gridworld__internal__command:update_actor:{\"id\": " + str(self.id) + ", \"img\": \"" + self.img + "\", \"color\": \"" + self.color + "\", \"x\": " + str(self.x) + ", \"y\": " + str(self.y) + ", \"direction\": " + str(self.direction) + "}")
   def rotateTo(self, direction):
     if direction < 0: direction += 8
     direction %= 8
@@ -28,6 +29,9 @@ class Actor:
       return
     self.x = x
     self.y = y
+    self.updateHost()
+  def setColor(self, color):
+    self.color = color
     self.updateHost()
   def moveLinear(self, forward):
     dir = [
@@ -56,19 +60,20 @@ class Actor:
   def turnRight(self):
     self.rotate(True)
 
-bugInstance = Actor("bug")
-bugInstance.moveTo(1, 5)
-def getBug():
+
+def createBug(x, y):
+  bugInstance = Actor("bug")
+  bugInstance.moveTo(x, y)
   return bugInstance
 
-tickFn = None
+tickFns = []
 def gridworld__internal__onMessage(e):
-  global tickFn
+  global tickFns
   if e.data.startswith("gridworld__internal__tick"):
-    if tickFn is not None:
-      tickFn()
+    for fn in tickFns:
+      fn()
 window.addEventListener("message", gridworld__internal__onMessage)
 
 def onTick(fn):
-  global tickFn
-  tickFn = fn
+  global tickFns
+  tickFns.append(fn)

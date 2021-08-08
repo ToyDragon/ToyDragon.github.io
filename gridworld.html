@@ -2,6 +2,8 @@
 <html lang="en">
   <head>
     <title>Grid World</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-KyZXEAg3QhqLMpG8r+8fhAXLRk2vvoC2f3B09zVXn8CA5QIVfZOJ3BCsw2P0p/We" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-U1DAWAznBHeqEIlVSCgzq+c9gqGAJn5c/t99JyeKa9xxaYpSvHU5awsuZVVFIhvj" crossorigin="anonymous"></script>
     <style type="text/css">
       html, body, #content {
         width: 100%;
@@ -12,6 +14,22 @@
         overflow: hidden;
       }
 
+      #editorPane {
+        display: inline-block;
+        height: 100%;
+        width: 640px;
+        flex-grow: 0;
+        overflow:hidden;
+      }
+
+      #selection {
+        position: relative;
+        display: inline-block;
+        height: 64px;
+        width: 640px;
+        background-color: #272822;
+      }
+
       #content {
         display: flex;
         flex-direction: row;;
@@ -19,9 +37,9 @@
 
       #editor { 
         display: inline-block;
-        width: 640px;
-        height: 100%;
-        flex-grow: 0;
+        width: 900px;
+        height: calc(100% - 256px);
+        margin-top: -6px;
       }
 
       #result { 
@@ -93,31 +111,122 @@
         width: 56px;
         height: 56px;
         background-size: 100% 100%;
+        background-blend-mode: multiply;
+      }
+
+      .title {
+        position: relative;
+        font-size: 32px;
+        left: 52px;
+        top: 6px;
+        color: white;
+      }
+
+      .btnContainer {
+        position: absolute;
+        right: 20px;
+        top: 12px;
+      }
+
+      .scenarioInfo {
+        position: relative;
+        display: inline-block;
+        height: 192px;
+        width: 640px;
+        padding: 6px;
+        color: white;
+        background-color: #3e3f39;
+        overflow-y: scroll;
       }
     </style>
   </head>
   <body>
     <div id="content">
-      <div id="editor">import gridworld
+      <div id="editorPane">
+        <div id="selection">
+          <span class="title">
+            <span>Python</span>
+            <span>Gridworld</span>
+          </span>
+          <div class="btn-group btnContainer">
+            <button type="button" class="btn btn-info dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+              Switch Scenario
+            </button>
+            <ul class="dropdown-menu">
+              <li><a class="dropdown-item" href="#">Circle Bugs</a></li>
+            </ul>
+          </div>
+        </div>
+        <div class="scenarioInfo">
+          <div>
+            <h3>Scenario: Circle Bugs</h3>
+            <p>This scenario demonstrates two bugs with identical behavior, but very different implementations.</p>
+            <p>
+              The first bug, the red one called "bug A", was implemented by a dumbass.
+              It's hardcoded to do the same exact 24 movements, repeatedly, until it dies a slow and cold bug death.
+              Imagine if you wanted to extend the radius of it's circle path by 1, you'd have to change all the indices, you'd have to add or remove a bunch of moveForward commands.
+              It'd be crazy.
+            </p>
+            <p>
+              The other bug, the blue one called "bug B", is god-tier.
+              It's implemented to be flexible. Altering the circle path is easy. You could even change it to go in a square pattern pretty easily.
+            </p>
+          </div>
+        </div>
+        <div id="editor">import gridworld
 
-tickCount = 0
-def tick():
-    global tickCount
-    tickCount += 1  
-    if tickCount % 3 == 0:        
-        # Turn the bug clockwise.
-        gridworld.getBug().turnRight()
+bugA = gridworld.createBug(7, 3)
+bugA.setColor("red")
+bugA.turnRight()
+bugA.turnRight()
+bugA.turnRight()
+bugA.turnRight()
 
-        # Show the new rotation.
-        print("Direction: ", gridworld.getBug().direction)
+bugATickCount = 0
+def tickBugA():
+    global bugATickCount
+    state = (bugATickCount % 24)
+    if state == 0: bugA.moveForward()
+    if state == 1: bugA.moveForward()
+    if state == 2: bugA.turnRight()
+    if state == 3: bugA.moveForward()
+    if state == 4: bugA.moveForward()
+    if state == 5: bugA.turnRight()
+    if state == 6: bugA.moveForward()
+    if state == 7: bugA.moveForward()
+    if state == 8: bugA.turnRight()
+    if state == 9: bugA.moveForward()
+    if state == 10: bugA.moveForward()
+    if state == 11: bugA.turnRight()
+    if state == 12: bugA.moveForward()
+    if state == 13: bugA.moveForward()
+    if state == 14: bugA.turnRight()
+    if state == 15: bugA.moveForward()
+    if state == 16: bugA.moveForward()
+    if state == 17: bugA.turnRight()
+    if state == 18: bugA.moveForward()
+    if state == 19: bugA.moveForward()
+    if state == 20: bugA.turnRight()
+    if state == 21: bugA.moveForward()
+    if state == 22: bugA.moveForward()
+    if state == 23: bugA.turnRight()
+    bugATickCount += 1
+gridworld.onTick(tickBugA)
+
+bugBTickCount = 0
+bugB = gridworld.createBug(1, 5)
+bugB.setColor("blue")
+def tickBugB():
+    global bugBTickCount
+    # Every third tick, turn the bug clockwise.
+    if bugBTickCount % 3 == 2:
+        bugB.turnRight()
+    # For the other two ticks, move the bug forward.
     else:
-        # Move the bug forward.
-        gridworld.getBug().moveForward()
-
-        # Show the new position.
-        print("Position: ", gridworld.getBug().x, ", ", gridworld.getBug().y)
-gridworld.onTick(tick)
-</div>
+        bugB.moveForward()
+    bugBTickCount += 1  
+gridworld.onTick(tickBugB)</div>
+      </div>
       <div id="result">
         <div id="boardContainer">
           <div id="board"></div>
@@ -156,8 +265,9 @@ gridworld.onTick(tick)
 
       var gameRoot = document.querySelector("#board");
       var images = {
-        "bug": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADoAAAA6CAYAAADhu0ooAAABhWlDQ1BJQ0MgcHJvZmlsZQAAKJF9kT1Iw0AYht+mSotUHNpBxCFD1cWCqIijVLEIFkpboVUHk0v/oElDkuLiKLgWHPxZrDq4OOvq4CoIgj8gbm5Oii5S4ndJoUWMdxz38N73vtx9BwjNKlPNnglA1SwjnYiLufyqGHhFkKYfYYxJzNSTmcUsPMfXPXx8v4vxLO+6P0e/UjAZ4BOJ55huWMQbxDObls55nzjCypJCfE48btAFiR+5Lrv8xrnksMAzI0Y2PU8cIRZLXSx3MSsbKvE0cVRRNcoXci4rnLc4q9U6a9+TvzBU0FYyXKc1jASWkEQKImTUUUEVFmK0a6SYSNN53MM/5PhT5JLJVQEjxwJqUCE5fvA/+N1bszg16SaF4kDvi21/jACBXaDVsO3vY9tunQD+Z+BK6/hrTWD2k/RGR4seAQPbwMV1R5P3gMsdYPBJlwzJkfy0hGIReD+jb8oD4Vugb83tW/scpw9Alnq1fAMcHAKjJcpe93h3sLtv/9a0+/cDTPJymHuCs7EAAAAGYktHRAD/AP8A/6C9p5MAAAAJcEhZcwAALiMAAC4jAXilP3YAAAAHdElNRQflCAgDFwPhVSjKAAAAGXRFWHRDb21tZW50AENyZWF0ZWQgd2l0aCBHSU1QV4EOFwAAAU1JREFUaN7t2rsBwjAMBFCfd2AW9mAaRmAa9mAWhjAlFcbm9CVSmQLrRXJQPmh2MT4ch8XicEaa5YEASJNcEASpng8CIVVzgjVw3B/vxS9ns9zghbTGwhNpiYU30goLTeQKcAMMT6goUhOLaEgtLCIiNbCIipTGQgKpAVwEQxpqWkWN6iILksUiE5LBdoW7D88Yu9CMyGnuYJDB9ujUhj+q5BTb20HiMFBqj2ayUZPRrZ1MM7+258+Dz8+ta41k16yLUbI9O1Qq6tG27NrVugUtaEELWtAo0MnM6Tnv0lAkKBiqdVmoR/sya3ap1ojctnTrWlaVXauzZ87zCrzTaSkuRhInU+z9qNY9KvOciK2oWQtL/qb4q32J6i4AYQVVw2ogJf4flx6cfUNvtKjL5zdbWMdtJj7xjIhArdFuRERqzrAjWl6H+aa+oiJpvADza2mjQtH41QAAAABJRU5ErkJggg==",
-      }
+        //"bug": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADoAAAA6CAYAAADhu0ooAAABhWlDQ1BJQ0MgcHJvZmlsZQAAKJF9kT1Iw0AYht+mSotUHNpBxCFD1cWCqIijVLEIFkpboVUHk0v/oElDkuLiKLgWHPxZrDq4OOvq4CoIgj8gbm5Oii5S4ndJoUWMdxz38N73vtx9BwjNKlPNnglA1SwjnYiLufyqGHhFkKYfYYxJzNSTmcUsPMfXPXx8v4vxLO+6P0e/UjAZ4BOJ55huWMQbxDObls55nzjCypJCfE48btAFiR+5Lrv8xrnksMAzI0Y2PU8cIRZLXSx3MSsbKvE0cVRRNcoXci4rnLc4q9U6a9+TvzBU0FYyXKc1jASWkEQKImTUUUEVFmK0a6SYSNN53MM/5PhT5JLJVQEjxwJqUCE5fvA/+N1bszg16SaF4kDvi21/jACBXaDVsO3vY9tunQD+Z+BK6/hrTWD2k/RGR4seAQPbwMV1R5P3gMsdYPBJlwzJkfy0hGIReD+jb8oD4Vugb83tW/scpw9Alnq1fAMcHAKjJcpe93h3sLtv/9a0+/cDTPJymHuCs7EAAAAGYktHRAD/AP8A/6C9p5MAAAAJcEhZcwAALiMAAC4jAXilP3YAAAAHdElNRQflCAgDFwPhVSjKAAAAGXRFWHRDb21tZW50AENyZWF0ZWQgd2l0aCBHSU1QV4EOFwAAAU1JREFUaN7t2rsBwjAMBFCfd2AW9mAaRmAa9mAWhjAlFcbm9CVSmQLrRXJQPmh2MT4ch8XicEaa5YEASJNcEASpng8CIVVzgjVw3B/vxS9ns9zghbTGwhNpiYU30goLTeQKcAMMT6goUhOLaEgtLCIiNbCIipTGQgKpAVwEQxpqWkWN6iILksUiE5LBdoW7D88Yu9CMyGnuYJDB9ujUhj+q5BTb20HiMFBqj2ayUZPRrZ1MM7+258+Dz8+ta41k16yLUbI9O1Qq6tG27NrVugUtaEELWtAo0MnM6Tnv0lAkKBiqdVmoR/sya3ap1ojctnTrWlaVXauzZ87zCrzTaSkuRhInU+z9qNY9KvOciK2oWQtL/qb4q32J6i4AYQVVw2ogJf4flx6cfUNvtKjL5zdbWMdtJj7xjIhArdFuRERqzrAjWl6H+aa+oiJpvADza2mjQtH41QAAAABJRU5ErkJggg==",
+        "bug": '<svg viewBox="0 0 500 500" xmlns="http://www.w3.org/2000/svg" xmlns:bx="https://boxy-svg.com"><path d="M 632 783 m -187.707 0 a 187.707 185.942 0 1 0 375.414 0 a 187.707 185.942 0 1 0 -375.414 0 Z M 632 783 m -112.624 0 a 112.624 111.566 0 0 1 225.248 0 a 112.624 111.566 0 0 1 -225.248 0 Z" style="fill: rgb(45, 45, 45);" transform="matrix(-0.553149, 0.833082, -0.833082, -0.553149, 1239.99939, 195.733459)" bx:shape="ring 632 783 112.624 111.566 187.707 185.942 1@d533d269"/><path d="M 226.651 11.43 L 393.798 331.124 L 59.503 331.124 L 226.651 11.43 Z" style="fill: rgb(45, 45, 45);" transform="matrix(-0.49834, -0.866982, 0.866982, -0.49834, 154.434402, 507.18338)" bx:shape="triangle 59.503 11.43 334.295 319.694 0.5 0 1@ed5f7eed"/><path d="M 240.361 33.987 L 388.53 318.919 L 92.191 318.919 L 240.361 33.987 Z" style="fill: rgb(160, 160, 160);" transform="matrix(-0.507729, -0.861517, 0.861517, -0.507729, 167.479477, 513.572876)" bx:shape="triangle 92.191 33.987 296.339 284.932 0.5 0 1@a66c1550"/><circle cx="237.49" cy="289.992" r="169.13"/></svg>'
+      };
       function onFrameMessage(msg) {
         if (msg.data.indexOf("gridworld__internal__command") === 0) {
           const command_and_data = msg.data.substr("gridworld__internal__command:".length);
@@ -172,12 +282,13 @@ gridworld.onTick(tick)
             if (!elesById[actorData.id]) {
               elesById[actorData.id] = document.createElement("div");
               elesById[actorData.id].classList.add("actor");
-              elesById[actorData.id].style["backgroundImage"] = "url(" + images[actorData.img] + ")";
+              elesById[actorData.id].innerHTML = images[actorData.img];
               gameRoot.appendChild(elesById[actorData.id]);
             }
             elesById[actorData.id].style.left = Math.floor(actorData.x / size * 100) + "%";
             elesById[actorData.id].style.top = Math.floor(actorData.y / size * 100) + "%";
             elesById[actorData.id].style.transform = "rotate(" + Math.floor(actorData.direction * 45) + "deg)";
+            elesById[actorData.id].children[0].style.fill = actorData.color;
           }
         }
       }
