@@ -190,6 +190,7 @@
       var grid_height = 9;
       var actorsById = {};
       var elesById = {};
+      var originalScenarioCode = "";
 
       async function loadScenario(scenario) {
           var ele = document.querySelector("a[data-scenarioname=" + scenario + "]");
@@ -201,6 +202,7 @@
           grid_height = Number(ele.getAttribute("data-gridheight"));
           document.querySelector("#scenarioInfo").innerHTML = await (await fetch("/data/" + scenario + ".html")).text();
           editor.setValue(await (await fetch("/data/" + scenario + ".py")).text(), -1);
+          originalScenarioCode = editor.getValue();
           window.location.hash = "#" + scenario;
           var modifiedCode = window.localStorage.getItem(activeScenarioName);
           if (modifiedCode) {
@@ -330,7 +332,14 @@
       }
 
       function saveCode() {
-        window.localStorage.setItem(activeScenarioName, editor.getValue());
+        var modifiedCode = editor.getValue();
+        var clean = function(s) {
+          return s.toLowerCase().replace(/\s/g, "");
+        }
+        if (clean(modifiedCode) === clean(originalScenarioCode)) {
+          modifiedCode = "";
+        }
+        window.localStorage.setItem(activeScenarioName, modifiedCode);
       }
 
       window.addEventListener("keydown", function(event) {
