@@ -184,6 +184,7 @@
       
       var iframe = null;
       var frameHost = document.querySelector("#frameHost");
+      var activeScenarioName = "none";
       
       var grid_width = 9;
       var grid_height = 9;
@@ -195,11 +196,16 @@
           if (!ele) {
             return;
           }
+          activeScenarioName = scenario;
           grid_width = Number(ele.getAttribute("data-gridwidth"));
           grid_height = Number(ele.getAttribute("data-gridheight"));
           document.querySelector("#scenarioInfo").innerHTML = await (await fetch("/data/" + scenario + ".html")).text();
           editor.setValue(await (await fetch("/data/" + scenario + ".py")).text(), -1);
           window.location.hash = "#" + scenario;
+          var modifiedCode = window.localStorage.getItem(activeScenarioName);
+          if (modifiedCode) {
+            editor.setValue(modifiedCode, -1);
+          }
           runCode();
       }
 
@@ -323,11 +329,16 @@
         }, 100);
       }
 
+      function saveCode() {
+        window.localStorage.setItem(activeScenarioName, editor.getValue());
+      }
+
       window.addEventListener("keydown", function(event) {
         if (event.ctrlKey || event.metaKey) {
           if (String.fromCharCode(event.which).toLowerCase() === "s") {
             event.preventDefault();
             runCode();
+            saveCode();
           }
         }
       });
