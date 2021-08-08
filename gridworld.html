@@ -280,6 +280,9 @@
             iframe.contentWindow.postMessage("gridworld__internal__tick");
           }, 500);
         }
+        if (msg.data === "gridworld__internal__requestscript") {
+          iframe.contentWindow.postMessage("gridworld__internal__script:" + editor.getValue());
+        }
       }
       
       function initGame() {
@@ -324,11 +327,8 @@
         iframe = document.createElement("iframe");
         iframe.src = "/gridworld_pyframe.html";
         frameHost.appendChild(iframe);
-        setTimeout(function() {
-          initGame();
-          iframe.contentWindow.addEventListener("message", onFrameMessage);
-          iframe.contentWindow.postMessage("gridworld__internal__script:" + editor.getValue());
-        }, 100);
+        iframe.contentWindow.addEventListener("message", onFrameMessage);
+        initGame();
       }
 
       function saveCode() {
