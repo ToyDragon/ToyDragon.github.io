@@ -236,7 +236,8 @@ def tick():
       }
 
       var actorList = [];
-      var bug = new Actor("/bug.png");
+      const bugUri = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADoAAAA6CAYAAADhu0ooAAABhWlDQ1BJQ0MgcHJvZmlsZQAAKJF9kT1Iw0AYht+mSotUHNpBxCFD1cWCqIijVLEIFkpboVUHk0v/oElDkuLiKLgWHPxZrDq4OOvq4CoIgj8gbm5Oii5S4ndJoUWMdxz38N73vtx9BwjNKlPNnglA1SwjnYiLufyqGHhFkKYfYYxJzNSTmcUsPMfXPXx8v4vxLO+6P0e/UjAZ4BOJ55huWMQbxDObls55nzjCypJCfE48btAFiR+5Lrv8xrnksMAzI0Y2PU8cIRZLXSx3MSsbKvE0cVRRNcoXci4rnLc4q9U6a9+TvzBU0FYyXKc1jASWkEQKImTUUUEVFmK0a6SYSNN53MM/5PhT5JLJVQEjxwJqUCE5fvA/+N1bszg16SaF4kDvi21/jACBXaDVsO3vY9tunQD+Z+BK6/hrTWD2k/RGR4seAQPbwMV1R5P3gMsdYPBJlwzJkfy0hGIReD+jb8oD4Vugb83tW/scpw9Alnq1fAMcHAKjJcpe93h3sLtv/9a0+/cDTPJymHuCs7EAAAAGYktHRAD/AP8A/6C9p5MAAAAJcEhZcwAALiMAAC4jAXilP3YAAAAHdElNRQflCAgDFwPhVSjKAAAAGXRFWHRDb21tZW50AENyZWF0ZWQgd2l0aCBHSU1QV4EOFwAAAU1JREFUaN7t2rsBwjAMBFCfd2AW9mAaRmAa9mAWhjAlFcbm9CVSmQLrRXJQPmh2MT4ch8XicEaa5YEASJNcEASpng8CIVVzgjVw3B/vxS9ns9zghbTGwhNpiYU30goLTeQKcAMMT6goUhOLaEgtLCIiNbCIipTGQgKpAVwEQxpqWkWN6iILksUiE5LBdoW7D88Yu9CMyGnuYJDB9ujUhj+q5BTb20HiMFBqj2ayUZPRrZ1MM7+258+Dz8+ta41k16yLUbI9O1Qq6tG27NrVugUtaEELWtAo0MnM6Tnv0lAkKBiqdVmoR/sya3ap1ojctnTrWlaVXauzZ87zCrzTaSkuRhInU+z9qNY9KvOciK2oWQtL/qb4q32J6i4AYQVVw2ogJf4flx6cfUNvtKjL5zdbWMdtJj7xjIhArdFuRERqzrAjWl6H+aa+oiJpvADza2mjQtH41QAAAABJRU5ErkJggg==";
+      var bug = new Actor(bugUri);
       actorList.push(bug);
       
       var gameRoot = document.querySelector("#board");
